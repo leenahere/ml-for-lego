@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<title>RoboControl</title>
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0
+        }
+
+        #main {
+            position: relative;
+            margin: 100px auto 0 auto;
+            width: 450px;
+            height: 260px;
+            text-align: center;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        #main .key {
+            display: inline-block;
+            margin: 10px;
+            width: 100px;
+            height: 100px;
+            border: LightGray solid 1.5px;
+            border-radius: 4px;
+            line-height: 100px;
+            font-size: 30px;
+            color: gray;
+            transition: 0.5s;
+        }
+
+        #main .key.aktiv {
+            border: black solid 1.5px;
+            color: black;
+        }
+    </style>
+
+    <script type="text/javascript">
+
+        $( document ).ready(function() {
+
+            allowedKeys = ['a','w','s','d','q']
+            arrayToSend = [0,0,0,0,0]
+
+            $('html').keydown(function(event) {
+                k = event.key;
+                if (arrayToSend[allowedKeys.indexOf(k)] == 0) {
+                    arrayToSend[allowedKeys.indexOf(k)] = 1;
+                    showKeyAndSend(k, true)
+                }
+            });
+
+            $('html').keyup(function(event) {
+                k = event.key;
+                arrayToSend[allowedKeys.indexOf(k)] = 0
+                showKeyAndSend(k, false)
+            });
+
+            function showKeyAndSend(key,status) {
+                if (status) {
+                    $('.key.' + key).addClass('aktiv');
+                } else {
+                    $('.key.' + key).removeClass('aktiv');
+                }
+
+				$.get('http://127.0.0.1:8080?c=' + arrayToSend[0] + arrayToSend[1] + arrayToSend[2] + arrayToSend[3] + arrayToSend[4], function() {
+					console.log(arrayToSend)
+				});
+            }
+        });
+
+    </script>
+
+</head>
+<body>
+    <div id="main">
+        <span class="key w">W</span><br>
+        <span class="key a">A</span>
+        <span class="key s">S</span>
+        <span class="key d">D</span>
+    </div>
+</body>
+</html>
