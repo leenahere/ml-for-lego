@@ -3,11 +3,11 @@
 # Import the EV3-robot library
 from ev3dev.auto import *
 import requests
-import sys
+import glob
+import os
 
 # session id of user and ip of backend
-SESSION_ID = str(sys.argv[1]) # something like '32449845-0933-8d72-ece6-be75d2071f4b'
-ENDPOINT_ADDRESS = str(sys.argv[2]) # something like 'http://192.168.100.144:80/api/predict/'
+ENDPOINT_ADDRESS = '192.168.100.144'
 
 # Connect motors
 left_motor = LargeMotor(OUTPUT_B)
@@ -85,17 +85,21 @@ def run():
 
     # Why divide by 1000 instead of average? Length of recording should be represented in data. Therefore, average is insufficient
     lefty = sum(left_sensor_list) / 1000
-    midy = sum(left_sensor_list) / 1000
-    righty = sum(left_sensor_list) / 1000
-    leftm = sum(left_sensor_list) / 1000
-    rightm = sum(left_sensor_list) / 1000
+    midy = sum(mid_sensor_list) / 1000
+    righty = sum(right_sensor_list) / 1000
+    leftm = sum(left_motor_list) / 1000
+    rightm = sum(right_motor_list) / 1000
 
     X_new = str(lefty) + ',' + str(midy) + ',' + str(righty) + ',' + str(leftm) + ',' + str(rightm)
 
     print(str(lefty) + ',' + str(midy) + ',' + str(righty) + ',' + str(leftm) + ',' + str(rightm))
 
+    search_results = glob.glob('./models/digit_classifier*.sav')
+    latest_file = max(search_results, key=os.path.getctime)
+    session_id = latest_file.split('digit_classifier')[1].split('.sav')[0]
+
     # Get Model Prediciton from backend
-    r = requests.get(ENDPOINT_ADDRESS + X_new + '/' + SESSION_ID)
+    r = requests.get('http://' + ENDPOINT_ADDRESS + ':80/api/predict/' + X_new + '/' + session_id)
     y = r.json()
 
     string_speak = ''.join(str(e) for e in y)

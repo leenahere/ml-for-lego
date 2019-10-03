@@ -110,10 +110,10 @@ while not btn.any():
 if btn.enter:
     # Why divide by 1000 instead of average? Length of recording should be represented in data. Therefore, average is insufficient
     lefty = sum(left_sensor_list) / 1000
-    midy = sum(left_sensor_list) / 1000
-    righty = sum(left_sensor_list) / 1000
-    leftm = sum(left_sensor_list) / 1000
-    rightm = sum(left_sensor_list) / 1000
+    midy = sum(mid_sensor_list) / 1000
+    righty = sum(right_sensor_list) / 1000
+    leftm = sum(left_motor_list) / 1000
+    rightm = sum(right_motor_list) / 1000
     data_point = [lefty, midy, righty, leftm, rightm, number]
     with open(filename, 'a') as f:
         writer = csv.writer(f)

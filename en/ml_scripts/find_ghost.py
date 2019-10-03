@@ -4,9 +4,14 @@ from ev3dev2.motor import MoveSteering, OUTPUT_B, OUTPUT_C
 from ev3dev.ev3 import *
 import math
 from time import sleep
+import requests
+import glob
+import os
+import re
 
 DIST_TO_CM_RATIO = 0.42
 CM_PER_SECOND = 5 # determined by trial and error. cm that robot travels with speed set to 10
+ENDPOINT_ADDRESS = '192.168.100.144'
 
 steer_pair = MoveSteering(OUTPUT_B, OUTPUT_C)
 
@@ -17,11 +22,23 @@ def calc_coordinates(heading, dist):
     ghost_y = dist * DIST_TO_CM_RATIO
     return ghost_x, ghost_y
 
-# TODO
-#load model(s) here. Figure out how they come from web app
-#predict heading and label by models (figure out if prediciton can be done on robot or in backend)
 
-ghost_est_x, ghost_est_y = calc_coordinates(16.25, 172.7) # prediction should be input params for calc_coordinates
+search_results = glob.glob('./models/*.sav')
+latest_file = max(search_results, key=os.path.getctime)
+pattern = re.compile('./models/ghost_regressor.*.sav')
+print(latest_file)
+print(pattern.match(latest_file))
+if pattern.match(latest_file):
+    mode = "one"
+else:
+    mode = "two"
+
+session_id = latest_file.split('regressor')[1].split('.sav')[0]
+timestamp = str(25.0)
+r = requests.get('http://' + ENDPOINT_ADDRESS + ':80/api/predict/ghost/' + timestamp + '/' + mode + '/' + session_id)
+y = r.json()
+print(y)
+ghost_est_x, ghost_est_y = calc_coordinates(y[0][0], y[1][0])
 
 seconds_y = ghost_est_y / CM_PER_SECOND
 seconds_x = abs(ghost_est_x / CM_PER_SECOND)
