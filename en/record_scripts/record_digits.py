@@ -35,6 +35,10 @@ left_motor_list = []
 right_motor_list = []
 
 
+def average(list):
+    return sum(list) / float(len(list))
+
+
 def run():
     left = []
     middle = []
@@ -108,12 +112,11 @@ while not btn.any():
     sleep(0.01)
 
 if btn.enter:
-    # Why divide by 1000 instead of average? Length of recording should be represented in data. Therefore, average is insufficient
-    lefty = sum(left_sensor_list) / 1000
-    midy = sum(mid_sensor_list) / 1000
-    righty = sum(right_sensor_list) / 1000
-    leftm = sum(left_motor_list) / 1000
-    rightm = sum(right_motor_list) / 1000
+    lefty = average(left_sensor_list)
+    midy = average(mid_sensor_list)
+    righty = average(right_sensor_list)
+    leftm = average(left_motor_list)
+    rightm = average(right_motor_list)
     data_point = [lefty, midy, righty, leftm, rightm, number]
     with open(filename, 'a') as f:
         writer = csv.writer(f)
