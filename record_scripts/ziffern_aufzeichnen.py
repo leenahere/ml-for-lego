@@ -84,7 +84,7 @@ def run():
 
 def which_number():
     counter = 0
-    print("Press up button as many times as the number value, then press enter to confirm the recorded number")
+    print("Druecke den Hoch-Button, um die Zahl einzugeben, die du aufnehmen willst. Bestaetige die Zahl mit dem mittleren Button.")
     while not btn.enter:
         if btn.up:
             counter += 1
@@ -98,8 +98,8 @@ def which_number():
 
 
 number = which_number()
-print(str(number) + ' is being recorded')
-filename = r'./../csv_data/data_'+ str(number) + '.csv'
+print(str(number) + ' wird aufgenommen')
+filename = r'./../csv_data/ziffern.csv'
 f = open(filename, 'a')
 
 run()
@@ -107,7 +107,7 @@ run()
 left_motor.stop()
 right_motor.stop()
 
-print("If you want to save the data to the csv file press the center button, if you want to discard the data you just collected press the down button.")
+print("Wenn du die aufgenommenen Daten speichere willst, druecke den mittleren Button zum Bestaetigen. Um die Daten zu verwerfen, druecke den Unten-Button.")
 while not btn.any():
     sleep(0.01)
 

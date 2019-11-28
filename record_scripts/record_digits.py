@@ -2,12 +2,8 @@
 
 # Import the EV3-robot library
 from ev3dev.auto import *
-import requests
-import glob
-import os
-
-# session id of user and ip of backend
-ENDPOINT_ADDRESS = '192.168.100.144'
+import csv
+from time import sleep
 
 # Connect motors
 left_motor = LargeMotor(OUTPUT_B)
@@ -30,6 +26,8 @@ col_left.mode = 'COL-REFLECT'
 col_mid.mode = 'COL-REFLECT'
 col_right.mode = 'COL-REFLECT'
 
+btn = Button()
+
 left_sensor_list = []
 mid_sensor_list = []
 right_sensor_list = []
@@ -37,13 +35,16 @@ left_motor_list = []
 right_motor_list = []
 
 
+def average(list):
+    return sum(list) / float(len(list))
+
+
 def run():
     left = []
     middle = []
     right = []
 
-    Sound.speak("Hallo")
-
+    # Stops once touch sensor has been pressed
     while not ts.value():
         # Add sensor values to respective list
         left.append(col_left.value())
@@ -80,32 +81,46 @@ def run():
         left_motor_list.append(left_motor.speed)
         right_motor_list.append(right_motor.speed)
 
-    left_motor.stop()
-    right_motor.stop()
 
-    # Why divide by 1000 instead of average? Length of recording should be represented in data. Therefore, average is insufficient
-    lefty = sum(left_sensor_list) / 1000
-    midy = sum(mid_sensor_list) / 1000
-    righty = sum(right_sensor_list) / 1000
-    leftm = sum(left_motor_list) / 1000
-    rightm = sum(right_motor_list) / 1000
-
-    X_new = str(lefty) + ',' + str(midy) + ',' + str(righty) + ',' + str(leftm) + ',' + str(rightm)
-
-    print(str(lefty) + ',' + str(midy) + ',' + str(righty) + ',' + str(leftm) + ',' + str(rightm))
-
-    search_results = glob.glob('./models/digit_classifier*.sav')
-    latest_file = max(search_results, key=os.path.getctime)
-    session_id = latest_file.split('digit_classifier')[1].split('.sav')[0]
-
-    # Get Model Prediciton from backend
-    r = requests.get('http://' + ENDPOINT_ADDRESS + ':80/api/predict/' + X_new + '/' + session_id)
-    y = r.json()
-
-    string_speak = ''.join(str(e) for e in y)
-    print(''.join(str(e) for e in y))
-    Sound.speak(string_speak)
+def which_number():
+    counter = 0
+    print("Press up button as many times as the number value, then press enter to confirm the recorded number")
+    while not btn.enter:
+        if btn.up:
+            counter += 1
+            print(counter)
+            sleep(0.3)
+        if btn.down:
+            counter -= 1
+            print(counter)
+            sleep(0.3)
+    return counter
 
 
-if __name__ == "__main__":
-    run()
+number = which_number()
+print(str(number) + ' is being recorded')
+filename = r'./../csv_data/digits.csv'
+f = open(filename, 'a')
+
+run()
+
+left_motor.stop()
+right_motor.stop()
+
+print("If you want to save the data to the csv file press the center button, if you want to discard the data you just collected press the down button.")
+while not btn.any():
+    sleep(0.01)
+
+if btn.enter:
+    lefty = average(left_sensor_list)
+    midy = average(mid_sensor_list)
+    righty = average(right_sensor_list)
+    leftm = average(left_motor_list)
+    rightm = average(right_motor_list)
+    data_point = [lefty, midy, righty, leftm, rightm, number]
+    with open(filename, 'a') as f:
+        writer = csv.writer(f)
+        writer.writerow(data_point)
+    print("Saved data")
+elif btn.down:
+    print("Discarded")
