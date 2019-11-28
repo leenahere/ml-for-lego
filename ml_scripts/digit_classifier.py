@@ -6,7 +6,7 @@ import requests
 import glob
 import os
 
-# session id of user and ip of backend
+# endpoint address of manthano server
 ENDPOINT_ADDRESS = '192.168.100.144'
 
 # Connect motors
